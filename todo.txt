@@ -1,0 +1,3 @@
+update git readme
+add in alias
+add in color option for startup

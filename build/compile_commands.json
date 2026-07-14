@@ -1,0 +1,37 @@
+[
+{
+  "directory": "/home/criley/pangolin_shell/build",
+  "command": "/usr/bin/g++ -g -Wall -Wextra -Wpedantic -std=gnu++23 -o CMakeFiles/pangolin.dir/src/main.cpp.o -c /home/criley/pangolin_shell/src/main.cpp",
+  "file": "/home/criley/pangolin_shell/src/main.cpp"
+},
+{
+  "directory": "/home/criley/pangolin_shell/build",
+  "command": "/usr/bin/g++ -g -Wall -Wextra -Wpedantic -std=gnu++23 -o CMakeFiles/pangolin.dir/src/repl.cpp.o -c /home/criley/pangolin_shell/src/repl.cpp",
+  "file": "/home/criley/pangolin_shell/src/repl.cpp"
+},
+{
+  "directory": "/home/criley/pangolin_shell/build",
+  "command": "/usr/bin/g++ -g -Wall -Wextra -Wpedantic -std=gnu++23 -o CMakeFiles/pangolin.dir/src/commands.cpp.o -c /home/criley/pangolin_shell/src/commands.cpp",
+  "file": "/home/criley/pangolin_shell/src/commands.cpp"
+},
+{
+  "directory": "/home/criley/pangolin_shell/build",
+  "command": "/usr/bin/g++ -g -Wall -Wextra -Wpedantic -std=gnu++23 -o CMakeFiles/pangolin.dir/src/lexer.cpp.o -c /home/criley/pangolin_shell/src/lexer.cpp",
+  "file": "/home/criley/pangolin_shell/src/lexer.cpp"
+},
+{
+  "directory": "/home/criley/pangolin_shell/build",
+  "command": "/usr/bin/g++ -g -Wall -Wextra -Wpedantic -std=gnu++23 -o CMakeFiles/pangolin.dir/src/parser.cpp.o -c /home/criley/pangolin_shell/src/parser.cpp",
+  "file": "/home/criley/pangolin_shell/src/parser.cpp"
+},
+{
+  "directory": "/home/criley/pangolin_shell/build",
+  "command": "/usr/bin/g++ -g -Wall -Wextra -Wpedantic -std=gnu++23 -o CMakeFiles/pangolin.dir/src/executor.cpp.o -c /home/criley/pangolin_shell/src/executor.cpp",
+  "file": "/home/criley/pangolin_shell/src/executor.cpp"
+},
+{
+  "directory": "/home/criley/pangolin_shell/build",
+  "command": "/usr/bin/g++ -g -Wall -Wextra -Wpedantic -std=gnu++23 -o CMakeFiles/pangolin.dir/src/calendar.cpp.o -c /home/criley/pangolin_shell/src/calendar.cpp",
+  "file": "/home/criley/pangolin_shell/src/calendar.cpp"
+}
+]
