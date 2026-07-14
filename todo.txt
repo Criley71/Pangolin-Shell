@@ -1,3 +1,4 @@
 update git readme
 add in alias
 add in color option for startup
+add in rc file to save aliases between instances
