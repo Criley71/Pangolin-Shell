@@ -86,20 +86,17 @@ void REPL::shell_startup() {
     }
 
     std::vector<std::string> cal = get_month_vector();
-    
 
     size_t max_lines = std::max(icon_vector.size(), cal.size());
-    int calendar_start_column = 63; 
+    int calendar_start_column = 63;
 
     std::cout << "\n";
     for (size_t i = 0; i < max_lines; i++) {
 
-   
         if (i < icon_vector.size()) {
             std::cout << icon_vector[i];
         }
 
- 
         std::cout << "\033[" << calendar_start_column << "G";
 
         if (i < cal.size()) {
@@ -127,108 +124,108 @@ void REPL::shell_startup() {
     //              "\033[37m";
 }
 
-void REPL::repl_loop() {
-    shell_startup(); // call start up logo on boot
+// void REPL::repl_loop() {
+//     shell_startup(); // call start up logo on boot
 
-    char cwd[2048]; // current working dir array
-    int last_status = 0;
-    Commands commands;
-    while (true) {
-        sigint_recieved = 0;
-        if (!getcwd(cwd, sizeof(cwd))) {
-            perror("\033[31m[!]\033[0m getcwd");
-            continue;
-        }
-        // prompt of pangolin and cwd, colored text used
-        std::string prompt = "\033[34m(pangolin)\033[32m" + std::string(cwd) + "\033[34m$\033[0m ";
+//     char cwd[2048]; // current working dir array
+//     int last_status = 0;
+//     Commands commands;
+//     while (true) {
+//         sigint_recieved = 0;
+//         if (!getcwd(cwd, sizeof(cwd))) {
+//             perror("\033[31m[!]\033[0m getcwd");
+//             continue;
+//         }
+//         // prompt of pangolin and cwd, colored text used
+//         std::string prompt = "\033[34m(pangolin)\033[32m" + std::string(cwd) + "\033[34m$\033[0m ";
 
-        char *line = readline(prompt.c_str());
-        if (!line) {
-            break; // ctrl+d
-        }
-        if (sigint_recieved) {
-            free(line);
-            continue;
-        }
+//         char *line = readline(prompt.c_str());
+//         if (!line) {
+//             break; // ctrl+d
+//         }
+//         if (sigint_recieved) {
+//             free(line);
+//             continue;
+//         }
 
-        std::vector<std::vector<std::string>> user_input_commands;
-        user_input_commands.push_back({});
-        std::stringstream ss(line);
-        std::string token;
-        while (ss >> token) {
-            if (token == "&&") {
-                user_input_commands.push_back({}); // new set of commands seperated by empty vector
-            } else {
-                user_input_commands.back().push_back(token);
-            }
-        }
-        // for (auto &cmd : user_input_commands){
-        //     for(auto &arg : cmd){
-        // tilde translation
-        //     }
-        // }
-        for (auto &cmd : user_input_commands) {
-            if (cmd.empty()) {
-                continue;
-            }
-            if (is_built_in(cmd[0])) {
-                bool success = commands.determine_command(cmd);
-                if (success) {
-                    last_status = 0;
-                } else {
-                    last_status = 1;
-                    break;
-                }
-                continue;
-            }
-            if (is_aliased(cmd[0])) {
-                for (auto &c : aliases[cmd[0]]) {
-                    cmd.push_back((const_cast<char *>(c.c_str())));
-                }
-            }
-            std::vector<char *> argv;
-            for (auto &v : cmd) {
-                argv.push_back(const_cast<char *>(v.c_str()));
-            }
-            argv.push_back(nullptr); // command arguments have to be ended with a null for execvp
+//         std::vector<std::vector<std::string>> user_input_commands;
+//         user_input_commands.push_back({});
+//         std::stringstream ss(line);
+//         std::string token;
+//         while (ss >> token) {
+//             if (token == "&&") {
+//                 user_input_commands.push_back({}); // new set of commands seperated by empty vector
+//             } else {
+//                 user_input_commands.back().push_back(token);
+//             }
+//         }
+//         // for (auto &cmd : user_input_commands){
+//         //     for(auto &arg : cmd){
+//         // tilde translation
+//         //     }
+//         // }
+//         for (auto &cmd : user_input_commands) {
+//             if (cmd.empty()) {
+//                 continue;
+//             }
+//             if (is_built_in(cmd[0])) {
+//                 bool success = commands.determine_command(cmd);
+//                 if (success) {
+//                     last_status = 0;
+//                 } else {
+//                     last_status = 1;
+//                     break;
+//                 }
+//                 continue;
+//             }
+//             if (is_aliased(cmd[0])) {
+//                 for (auto &c : aliases[cmd[0]]) {
+//                     cmd.push_back((const_cast<char *>(c.c_str())));
+//                 }
+//             }
+//             std::vector<char *> argv;
+//             for (auto &v : cmd) {
+//                 argv.push_back(const_cast<char *>(v.c_str()));
+//             }
+//             argv.push_back(nullptr); // command arguments have to be ended with a null for execvp
 
-            pid_t pid = fork(); // make new process for the command to run on
-            if (pid < 0) {
-                perror("\033[31m[!]\033[0m fork error");
-                last_status = 1;
-                break;
-            }
-            if (pid == 0) { // forked process id
-                signal(SIGINT, SIG_DFL);
-                execvp(argv[0], argv.data());
-                switch (errno) {
-                case ENOENT: // no file or dir
-                    std::cerr << "\033[31m[!]\033[0m no file or dir error\n";
-                    _exit(127);
-                    break;
-                case EACCES: // access denied
-                    _exit(126);
-                default:
-                    std::cerr << "\033[31m[!]\033[0m unknown command\n";
-                    _exit(1);
-                }
-            }
-            int status;
-            waitpid(pid, &status, 0);
+//             pid_t pid = fork(); // make new process for the command to run on
+//             if (pid < 0) {
+//                 perror("\033[31m[!]\033[0m fork error");
+//                 last_status = 1;
+//                 break;
+//             }
+//             if (pid == 0) { // forked process id
+//                 signal(SIGINT, SIG_DFL);
+//                 execvp(argv[0], argv.data());
+//                 switch (errno) {
+//                 case ENOENT: // no file or dir
+//                     std::cerr << "\033[31m[!]\033[0m no file or dir error\n";
+//                     _exit(127);
+//                     break;
+//                 case EACCES: // access denied
+//                     _exit(126);
+//                 default:
+//                     std::cerr << "\033[31m[!]\033[0m unknown command\n";
+//                     _exit(1);
+//                 }
+//             }
+//             int status;
+//             waitpid(pid, &status, 0);
 
-            if (WIFEXITED(status)) {
-                last_status = WEXITSTATUS(status);
-            } else {
-                last_status = 1;
-            }
-            if (last_status != 0) {
-                break;
-            }
-        }
-        check_dup_add_history(line);
-        free(line);
-    }
-}
+//             if (WIFEXITED(status)) {
+//                 last_status = WEXITSTATUS(status);
+//             } else {
+//                 last_status = 1;
+//             }
+//             if (last_status != 0) {
+//                 break;
+//             }
+//         }
+//         check_dup_add_history(line);
+//         free(line);
+//     }
+// }
 
 std::string REPL::get_history_dir() {
     const char *home = getenv("HOME");
@@ -327,6 +324,7 @@ bool REPL::is_aliased(std::string command) {
 }
 
 void REPL::repl2() {
+    ShellState state;
     shell_startup();
     char cwd[2048];
     Lexer lexer;
@@ -375,12 +373,12 @@ void REPL::repl2() {
             continue;
         }
         check_dup_add_history(user_input_commands.c_str());
-
+        std::string expanded_input = expand_aliases(user_input_commands, state);
         try {
-            auto tokens = lexer.lex_input(user_input_commands);
+            auto tokens = lexer.lex_input(expanded_input);
             Parser parser(tokens);
             auto ast = parser.parse();
-            executor.execute(ast.get());
+            executor.execute(ast.get(), state);
         } catch (const std::exception &e) {
             std::cerr << "\033[31m[!]\033[0m " << e.what() << ": " << user_input_commands << "\n";
         }
@@ -401,11 +399,6 @@ bool REPL::ends_in_backslash(std::string &s) {
     }
     return (count % 2) == 1;
 }
-
-#include <iomanip> // for std::setw
-#include <iostream>
-#include <string>
-#include <vector>
 
 void REPL::print_side_by_side(const std::vector<std::string> &logo, const std::vector<std::string> &cal) {
     size_t max_lines = std::max(logo.size(), cal.size());
@@ -432,4 +425,28 @@ void REPL::print_side_by_side(const std::vector<std::string> &logo, const std::v
         }
         std::cout << "\n";
     }
+}
+
+std::string REPL::expand_aliases(const std::string &input, ShellState &state) {
+    size_t start = input.find_first_not_of(" \t");
+    if (start == std::string::npos) {
+        return input; // just spaces for input
+    }
+    size_t end = input.find_first_of(" \t|&;<>", start); // word end
+
+    std::string first_word = input.substr(start, end - start);
+
+    auto it = state.aliases.find(first_word);
+    if (it != state.aliases.end()) { 
+        std::string alias_value = it->second;
+        //check if alias starts with the same first word
+        if (alias_value.substr(0, first_word.length()) == first_word && (alias_value.length() == first_word.length() || alias_value[first_word.length()] == ' ')) {
+            std::string remainder = (end == std::string::npos) ? "" : input.substr(end);
+            return alias_value + remainder;
+        }
+
+        std::string remainder = (end == std::string::npos) ? "" : input.substr(end);
+        return alias_value + remainder;
+    }
+    return input; //not an alias
 }

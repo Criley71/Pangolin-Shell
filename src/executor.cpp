@@ -31,13 +31,13 @@ void Executor::expand_commands(std::vector<std::string> &argv) {
     // }
 }
 
-int Executor::execute_command(ASTNode *node) {
+int Executor::execute_command(ASTNode *node, ShellState& state) {
     if (node->argv.empty()) {
         return 0;
     }
     Commands command;
     expand_commands(node->argv);
-    if (command.determine_command(node->argv)) {
+    if (command.determine_command(node->argv, state)) {
         return 0;
     }
     std::vector<char *> argv;
@@ -81,7 +81,7 @@ int Executor::execute_command(ASTNode *node) {
     return 0;
 }
 
-int Executor::execute_pipe(ASTNode *node) {
+int Executor::execute_pipe(ASTNode *node, ShellState& state) {
     int fd[2];
     if (pipe(fd) == -1) {
         std::cerr << "\033[31m[!]\033[0m pipe";
@@ -92,14 +92,14 @@ int Executor::execute_pipe(ASTNode *node) {
         dup2(fd[1], STDOUT_FILENO);
         close(fd[0]);
         close(fd[1]);
-        _exit(execute(node->left.get()));
+        _exit(execute(node->left.get(), state));
     }
     pid_t right = fork();
     if (right == 0) {
         dup2(fd[0], STDIN_FILENO);
         close(fd[1]);
         close(fd[0]);
-        _exit(execute(node->right.get()));
+        _exit(execute(node->right.get(), state));
     }
     close(fd[0]);
     close(fd[1]);
@@ -114,32 +114,32 @@ int Executor::execute_pipe(ASTNode *node) {
     return 0;
 }
 
-int Executor::execute(ASTNode *node) {
+int Executor::execute(ASTNode *node, ShellState& state) {
     if (!node) return 0;
     switch (node->type) {
     case NodeType::COMMAND:
-        return execute_command(node);
+        return execute_command(node, state);
 
     case NodeType::PIPE:
-        return execute_pipe(node);
+        return execute_pipe(node, state);
 
     case NodeType::AND_IF: {
-        int status = execute(node->left.get());
+        int status = execute(node->left.get(), state);
         if (status == 0) {
-            return execute(node->right.get());
+            return execute(node->right.get(), state);
         }
         return status;
     }
     case NodeType::OR_IF: {
-        int status = execute(node->left.get());
+        int status = execute(node->left.get(), state);
         if (status != 0)
-            return execute(node->right.get());
+            return execute(node->right.get(), state);
         return status;
     }
     case NodeType::SEQUENCE: {
-        execute(node->left.get());
+        execute(node->left.get(), state);
         // Execute and return the right side
-        return execute(node->right.get());
+        return execute(node->right.get(), state);
     }
     }
     throw std::runtime_error("Unknown AST Type");
