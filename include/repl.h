@@ -43,7 +43,12 @@ struct REPL {
     bool ends_in_backslash(std::string &s);
     void print_side_by_side(const std::vector<std::string> &logo, const std::vector<std::string> &cal);
     std::string expand_aliases(const std::string& input, ShellState& state);
-    
+    std::string get_rc_file();
+    void load_rc_file(ShellState& state, Lexer& lexer, Executor& executor);
+    std::string get_aliases_dir();
+    void load_aliases(ShellState& state);
+    void save_aliases(ShellState& state);
+
     
     
     std::string logo = R"(

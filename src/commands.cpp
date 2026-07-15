@@ -1,18 +1,20 @@
 #include "../include/commands.h"
 
-bool Commands::determine_command(std::vector<std::string> &command, ShellState &state) {
+int Commands::determine_command(std::vector<std::string> &command, ShellState &state) {
     if (command[0] == "cd") {
         if (command.size() < 2) {
             std::cerr << "\033[31m[!]\033[0m cd: missing argument\n";
-            return false;
+            return 1; // Return 1 because it IS a built-in (even though it failed)
         }
         cd(command[1]);
-        return true;
+        return 1;
     }
+    
     if (command[0] == "exit") {
-        std::cout << "Exiting... Thanks for using the pangolin shell! Until next time, so long.\n";
-        exit(0);
+        // TELEPORT OUT OF THE EXECUTOR!
+        throw ExitException(); 
     }
+    
     if (command[0] == "alias") {
         return builtin_alias(command, state);
     }
@@ -20,7 +22,7 @@ bool Commands::determine_command(std::vector<std::string> &command, ShellState &
         return builtin_unalias(command, state);
     }
 
-    return false;
+    return 0; // 0 means "Not a built-in"
 }
 
 bool Commands::cd(std::string path) {

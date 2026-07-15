@@ -329,6 +329,8 @@ void REPL::repl2() {
     char cwd[2048];
     Lexer lexer;
     Executor executor;
+    load_aliases(state);
+    //load_rc_file(state, lexer, executor);
 
     while (true) {
         sigint_recieved = 0;
@@ -352,6 +354,7 @@ void REPL::repl2() {
             }
             if (!line) {
                 std::cout << "Exiting... Thanks for using the pangolin shell! Until next time, so long.\n";
+                save_aliases(state);
                 return; // ctrl+d
             }
 
@@ -379,6 +382,12 @@ void REPL::repl2() {
             Parser parser(tokens);
             auto ast = parser.parse();
             executor.execute(ast.get(), state);
+            
+        } catch (const ExitException &e) {
+            std::cout << "Exiting... Thanks for using the pangolin shell! Until next time, so long.\n";
+            save_aliases(state); 
+            break; 
+            
         } catch (const std::exception &e) {
             std::cerr << "\033[31m[!]\033[0m " << e.what() << ": " << user_input_commands << "\n";
         }
@@ -430,16 +439,15 @@ void REPL::print_side_by_side(const std::vector<std::string> &logo, const std::v
 std::string REPL::expand_aliases(const std::string &input, ShellState &state) {
     size_t start = input.find_first_not_of(" \t");
     if (start == std::string::npos) {
-        return input; // just spaces for input
+        return input;
     }
-    size_t end = input.find_first_of(" \t|&;<>", start); // word end
+    size_t end = input.find_first_of(" \t|&;<>", start);
 
     std::string first_word = input.substr(start, end - start);
 
     auto it = state.aliases.find(first_word);
     if (it != state.aliases.end()) { 
         std::string alias_value = it->second;
-        //check if alias starts with the same first word
         if (alias_value.substr(0, first_word.length()) == first_word && (alias_value.length() == first_word.length() || alias_value[first_word.length()] == ' ')) {
             std::string remainder = (end == std::string::npos) ? "" : input.substr(end);
             return alias_value + remainder;
@@ -448,5 +456,93 @@ std::string REPL::expand_aliases(const std::string &input, ShellState &state) {
         std::string remainder = (end == std::string::npos) ? "" : input.substr(end);
         return alias_value + remainder;
     }
-    return input; //not an alias
+    return input; 
+}
+
+
+std::string REPL::get_rc_file() {
+    const char *home = getenv("HOME");
+    if (!home) {
+        struct passwd *pw = getpwuid(getuid());
+        if (pw) home = pw->pw_dir;
+    }
+    return std::string(home) + "/.pangolinrc";
+}
+
+void REPL::load_rc_file(ShellState& state, Lexer& lexer, Executor& executor) {
+    std::ifstream fin(get_rc_file());
+    
+
+    if (!fin.good()) {
+        return; 
+    }
+
+    std::string line;
+    while (getline(fin, line)) {
+
+        if (line.empty() || line[0] == '#') {
+            continue; 
+        }
+
+        std::string expanded_input = expand_aliases(line, state);
+
+        try {
+            auto tokens = lexer.lex_input(expanded_input);
+            if (tokens.empty()) continue; 
+
+            Parser parser(tokens);
+            auto ast = parser.parse();
+            executor.execute(ast.get(), state);
+
+        } catch (const std::exception &e) {
+            std::cerr << "\033[31m[!]\033[0m .pangolinrc error: " << e.what() << "\n";
+        }
+    }
+}
+
+std::string REPL::get_aliases_dir() {
+    const char *home = getenv("HOME");
+    if (!home) {
+        struct passwd *pw = getpwuid(getuid());
+        if (pw) home = pw->pw_dir;
+    }
+    const char *state = getenv("XDG_STATE_HOME");
+    std::string state_dir;
+    if (state) {
+        state_dir = state;
+    } else {
+        state_dir = std::string(home) + "/.local/state";
+    }
+    return state_dir + "/pangolin/aliases.txt";
+}
+
+void REPL::load_aliases(ShellState& state) {
+    std::ifstream fin(get_aliases_dir());
+    
+    if (!fin.is_open()) {
+        return; 
+    }
+
+    std::string line;
+    while (std::getline(fin, line)) {
+        size_t equals_pos = line.find('=');
+        if (equals_pos != std::string::npos) {
+            std::string key = line.substr(0, equals_pos);
+            std::string value = line.substr(equals_pos + 1);
+            state.aliases[key] = value;
+        }
+    }
+}
+
+void REPL::save_aliases(ShellState& state) {
+    std::ofstream fout(get_aliases_dir());
+    if (!fout.is_open()) {
+        std::cerr << "\033[31m[!]\033[0m Could not open aliases file for saving.\n";
+        return;
+    }
+    
+
+    for (const auto& pair : state.aliases) {
+        fout << pair.first << "=" << pair.second << "\n";
+    }
 }
