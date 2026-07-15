@@ -28,3 +28,16 @@
 ⠀⠀⠀⠀⠈⠉⠃⠘⠿⠟⠛⠋⠀⠀⠀⠀⢹⠃
 ```
 
+# About
+Pangolin is a simple unix shell written in C++ named after my favorite animal. It currently supports:
+* input/output redirection
+* Piping
+* Control operators || and &&
+* Background processes (&)
+* Aliases
+
+
+### Future Plans
+* Add in a color option for the startup colors 
+* Add some fun custom functions
+* Add overloading
