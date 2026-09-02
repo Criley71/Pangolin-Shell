@@ -21,6 +21,9 @@ int Commands::determine_command(std::vector<std::string> &command, ShellState &s
     if (command[0] == "unalias") {
         return builtin_unalias(command, state);
     }
+    if (command[0] == "pang" && command.size() > 1 && command[1] == "theme") {
+        return handle_theme(command, state);
+    }
 
     return 0; // 0 means "Not a built-in"
 }
@@ -78,5 +81,41 @@ bool Commands::builtin_unalias(std::vector<std::string> &argv, ShellState &state
         std::cout << "unalias: unalias [-a] name [name ...]\n   Remove each NAME from a list of defined aliases. \n\n   Options:\n      -a     remove all alias defintions\n\n";
     }
     state.aliases.erase(argv[1]);
+    return true;
+}
+
+bool Commands::handle_theme(std::vector<std::string> &argv, ShellState &state) {
+    // argv = { "pang", "theme", ... }
+    if (argv.size() == 2) { // just "pang theme"
+        for (const auto &pair : state.colors) {
+            std::cout << pair.second.ansi() << pair.first
+                       << " (" << pair.second.r << "," << pair.second.g << "," << pair.second.b << ")\033[0m\n";
+        }
+        return true;
+    }
+
+    if (argv[2] == "reset") {
+        state.colors.clear();
+        apply_default_colors(state);
+        save_colors(state);
+        std::cout << "Theme reset to defaults.\n";
+        return true;
+    }
+
+    if (argv[2] == "set" && argv.size() == 7) {
+        // pang theme set dir_color 0 200 100
+        std::string key = argv[3];
+        if (VALID_COLOR_KEYS.find(key) == VALID_COLOR_KEYS.end()) {
+            std::cerr << "\033[31m[!]\033[0m pang theme: unknown color key '" << key << "'\n";
+            return true;
+        }
+        int r = std::stoi(argv[4]), g = std::stoi(argv[5]), b = std::stoi(argv[6]);
+        state.colors[key] = RGB{r, g, b};
+        save_colors(state);
+        std::cout << "Set " << key << " to " << state.colors[key].ansi() << "sample\033[0m\n";
+        return true;
+    }
+
+    std::cerr << "\033[31m[!]\033[0m usage: pang theme [reset|set <key> <r> <g> <b>]\n";
     return true;
 }

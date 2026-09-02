@@ -33,5 +33,10 @@
   "directory": "/home/criley/pangolin_shell/build",
   "command": "/usr/bin/g++ -g -Wall -Wextra -Wpedantic -std=gnu++23 -o CMakeFiles/pangolin.dir/src/calendar.cpp.o -c /home/criley/pangolin_shell/src/calendar.cpp",
   "file": "/home/criley/pangolin_shell/src/calendar.cpp"
+},
+{
+  "directory": "/home/criley/pangolin_shell/build",
+  "command": "/usr/bin/g++ -g -Wall -Wextra -Wpedantic -std=gnu++23 -o CMakeFiles/pangolin.dir/src/theme.cpp.o -c /home/criley/pangolin_shell/src/theme.cpp",
+  "file": "/home/criley/pangolin_shell/src/theme.cpp"
 }
 ]

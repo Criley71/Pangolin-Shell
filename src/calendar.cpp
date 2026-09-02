@@ -1,6 +1,5 @@
 #include "../include/calendar.h"
 
-
 /*
 
   Index     Day
@@ -136,9 +135,7 @@ void printCalendar(int year) {
     printf("         Calendar - %d\n\n", year);
     int days;
 
-
     int current = dayNumber(1, 1, year);
-
 
     for (int i = 0; i < 12; i++) {
         days = numberOfDays(i, year);
@@ -150,9 +147,8 @@ void printCalendar(int year) {
         printf("╟─────┼─────┼─────┼─────┼─────┼─────┼─────╢\n");
 
         int k = current;
-        
-        printf("║");
 
+        printf("║");
 
         for (int p = 0; p < k; p++) {
             printf("     │");
@@ -165,16 +161,16 @@ void printCalendar(int year) {
 
             if (k > 6) {
 
-                printf("║\n"); 
+                printf("║\n");
 
                 if (j < days) {
                     printf("╟─────┼─────┼─────┼─────┼─────┼─────┼─────╢\n");
-                    printf("║"); 
+                    printf("║");
                 }
                 k = 0;
             } else {
 
-                printf("│"); 
+                printf("│");
             }
         }
 
@@ -183,10 +179,9 @@ void printCalendar(int year) {
                 printf("     ");
                 if (p < 6) printf("│");
             }
-            printf("║\n"); 
+            printf("║\n");
         }
 
-  
         printf("╚═════╧═════╧═════╧═════╧═════╧═════╧═════╝\n");
 
         current = k;
@@ -197,83 +192,72 @@ void printCalendar(int year) {
 void printCurrentMonth() {
 
     time_t t = time(0);
-    tm* now = localtime(&t);
-    
+    tm *now = localtime(&t);
 
     int year = now->tm_year + 1900;
-    int monthIndex = now->tm_mon; 
+    int monthIndex = now->tm_mon;
     int day = now->tm_mday;
-
-    
-
 
     int days = numberOfDays(monthIndex, year);
 
-
     int current = dayNumber(1, monthIndex + 1, year);
 
-
     printf("\n%s\n", getMonthName(monthIndex).c_str());
-
 
     printf("╟─────┬─────┬─────┬─────┬─────┬─────┬─────╢\n");
     printf("║ Sun │ Mon │ Tue │ Wed │ Thu │ Fri │ Sat ║\n");
     printf("╟─────┼─────┼─────┼─────┼─────┼─────┼─────╢\n");
 
     int k = current;
-    
 
     printf("║");
 
-  
     for (int p = 0; p < k; p++) {
         printf("     │");
     }
 
-
     for (int j = 1; j <= days; j++) {
 
-        if(j == day){
+        if (j == day) {
             printf("\033[36m %2d  \033[39m", j);
-        }else{
+        } else {
             printf(" %2d  ", j);
         }
         k++;
 
         if (k > 6) {
-            printf("║\n"); 
-            
+            printf("║\n");
 
             if (j < days) {
                 printf("╟─────┼─────┼─────┼─────┼─────┼─────┼─────╢\n");
-                printf("║"); 
+                printf("║");
             }
             k = 0;
         } else {
 
-            printf("│"); 
+            printf("│");
         }
     }
-
 
     if (k > 0) {
         for (int p = k; p <= 6; p++) {
             printf("     ");
             if (p < 6) printf("│");
         }
-        printf("║\n"); 
+        printf("║\n");
     }
 
     printf("╚═════╧═════╧═════╧═════╧═════╧═════╧═════╝\n");
 }
 
-std::vector<std::string> get_month_vector() {
+std::vector<std::string> get_month_vector(const std::string &color,
+                                           const std::string &today_color) {
     time_t t = time(0);
-    tm* now = localtime(&t);
+    tm *now = localtime(&t);
     std::vector<std::string> result;
 
     int year = now->tm_year + 1900;
-    int monthIndex = now->tm_mon; 
+    int monthIndex = now->tm_mon;
     int day = now->tm_mday;
 
     int days = numberOfDays(monthIndex, year);
@@ -297,27 +281,26 @@ std::vector<std::string> get_month_vector() {
     for (int j = 1; j <= days; j++) {
         char buf[64];
         if (j == day) {
-            // ANSI cyan for current day
-            snprintf(buf, sizeof(buf), "\033[36m %2d  \033[38;2;158;72;68m", j);
+            // Highlight for current day, then back to the base calendar color
+            snprintf(buf, sizeof(buf), "%s %2d  %s", today_color.c_str(), j, color.c_str());
         } else {
-
-            snprintf(buf, sizeof(buf), "\033[38;2;158;72;68m %2d  ", j);
+            snprintf(buf, sizeof(buf), "%s %2d  ", color.c_str(), j);
         }
-        
+
         current_line += buf;
         k++;
- 
+
         if (k > 6) {
             current_line += "║";
             result.push_back(current_line); // Push the completed week
-            
+
             if (j < days) {
                 result.push_back("╟─────┼─────┼─────┼─────┼─────┼─────┼─────╢");
-                current_line = "║";// start the next week
+                current_line = "║"; // start the next week
             }
             k = 0;
         } else {
-            current_line += "│"; 
+            current_line += "│";
         }
     }
 

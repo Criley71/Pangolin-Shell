@@ -3,6 +3,7 @@
 #include "commands.h"
 #include "executor.h"
 #include "lexer.h"
+#include "theme.h"
 #include <atomic>
 #include <csignal>
 #include <cstdlib>
@@ -27,7 +28,7 @@
 struct REPL {
     REPL();
     void repl_loop();
-    void shell_startup();
+    void shell_startup(ShellState &state);
     void repl_dir_print();
     bool is_built_in(std::string command);
     bool is_aliased(std::string command);
@@ -42,15 +43,13 @@ struct REPL {
     void repl2();
     bool ends_in_backslash(std::string &s);
     void print_side_by_side(const std::vector<std::string> &logo, const std::vector<std::string> &cal);
-    std::string expand_aliases(const std::string& input, ShellState& state);
+    std::string expand_aliases(const std::string &input, ShellState &state);
     std::string get_rc_file();
-    void load_rc_file(ShellState& state, Lexer& lexer, Executor& executor);
+    void load_rc_file(ShellState &state, Lexer &lexer, Executor &executor);
     std::string get_aliases_dir();
-    void load_aliases(ShellState& state);
-    void save_aliases(ShellState& state);
+    void load_aliases(ShellState &state);
+    void save_aliases(ShellState &state);
 
-    
-    
     std::string logo = R"(
 ██████╗░░█████╗░███╗░░░██╗░██████╗░░██████╗░██╗░░░░░██╗███╗░░░██╗
 ██╔═██║░██╔══██╗████╗░░██║██╔════╝░██╔═══██╗██║░░░░░██║████╗░░██║

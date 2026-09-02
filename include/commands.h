@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <unordered_map>
 #include <vector>
+#include "theme.h"
 
 struct Commands {
     int determine_command(std::vector<std::string> &command, ShellState &state);
@@ -14,6 +15,7 @@ struct Commands {
     void exit_shell();
     bool builtin_alias(std::vector<std::string> &argv, ShellState &state);
     bool builtin_unalias(std::vector<std::string> &argv, ShellState &state);
+    bool handle_theme(std::vector<std::string> &argv, ShellState &state);
 };
 
 struct ExitException : public std::exception {};

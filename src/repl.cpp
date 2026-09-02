@@ -19,7 +19,7 @@ int check_signals() {
 REPL::REPL() {
 }
 
-void REPL::shell_startup() {
+void REPL::shell_startup(ShellState& state) {
     rl_catch_signals = 0;
     rl_catch_sigwinch = 0;
     rl_event_hook = check_signals;
@@ -35,11 +35,11 @@ void REPL::shell_startup() {
         struct passwd *pw = getpwuid(getuid());
         if (pw) home = pw->pw_dir;
     }
-    const char *state = getenv("XDG_STATE_HOME");
+    const char *state_env = getenv("XDG_STATE_HOME");
     std::string state_dir;
 
-    if (state) {
-        state_dir = state;
+    if (state_env) {
+        state_dir = state_env;
     } else {
         state_dir = std::string(home) + "/.local/state";
     }
@@ -53,9 +53,9 @@ void REPL::shell_startup() {
     }
 
     load_history();
-    //  cout << " \033[48;2;158;72;68m " << logo << "     \033[0m\n";
-    std::string RED = "\033[38;2;158;72;68m";
-    std::string BLUE = "\033[38;2;66;63;79m";
+
+    std::string RED  = get_color(state, "logo_block",  RGB{158, 72, 68}).ansi();
+    std::string BLUE = get_color(state, "logo_border", RGB{66, 63, 79}).ansi();
     std::string RESET = "\033[0m";
     std::string block = "█";
     std::string blues[7] = {"╗", "║", "╝", "═", "╚", "╔", "░"};
@@ -85,7 +85,10 @@ void REPL::shell_startup() {
         }
     }
 
-    std::vector<std::string> cal = get_month_vector();
+    std::vector<std::string> cal = get_month_vector(
+        get_color(state, "calendar_text",  RGB{158, 72, 68}).ansi(),
+        get_color(state, "calendar_today", RGB{36, 200, 200}).ansi()
+    );
 
     size_t max_lines = std::max(icon_vector.size(), cal.size());
     int calendar_start_column = 63;
@@ -106,22 +109,6 @@ void REPL::shell_startup() {
         std::cout << "\n";
     }
     std::cout << "\n";
-    // std::cout << "\033[38;2;158;72;68m\n"
-    //              "⣀⠀⣀⣀\n"
-    //              "⣿⡀⢻⣿⣿⣿⣿⣿⣶⠀⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
-    //              "⠛⠓⠀⢻⣿⡿⠋⣉⣀⣀⢘⣿⣿⣿⡇⢠⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
-    //              "⣾⣿⣿⣿⣿⠀⣾⣿⣿⣿⣿⡿⠟⠛⠧⠈⢿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
-    //              "⣿⣿⣿⡿⠿⠄⠹⣿⣿⣿⡃⢰⣶⣶⣶⣦⣴⣿⣿⠇⣀⠀⠀⠀⠀⠀⠀⠀⠀\n"
-    //              "⣿⡏⢠⣴⣶⣦⣤⣼⣿⣿⡷⠄⠉⠉⣉⡉⠛⢿⡏⢰⣿⣦⡀⠀⠀⠀\n"
-    //              "⣿⡀⢿⣿⣿⣿⣿⣿⣿⠋⣠⣶⣧⡈⠛⠻⣷⣄⠁⠘⣿⣿⣷⡀⠀⠀\033[97m \u256D\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256E\n\033[38;2;158;72;68m"
-    //              "⢉⠁⠘⢿⣿⣿⣿⣿⡇⢰⣿⣿⣿⣿⣿⣿⣿⣿⡏⠀⠈⠛⢿⣷⡀⠀\033[97m \u2502 Welcome to the Pangolin Shell \u2502\n\033[38;2;158;72;68m"
-    //              "⣿⣿⣷⣿⡿⠛⣉⡉⠁⢸⠃⠈⠙⠻⢿⣿⣿⣿⣷⣶⣾⣷⣄⠙⠳\033[97m  \u2570\u252c\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256F\n\033[38;2;158;72;68m"
-    //              "⣿⣿⣿⣿⡀⢾⣿⣿⡇⠘⠀⠀⠀⠀⠀⠈⠉⠛⠻⠿⣿⣿⣿⣿⣦⡀⠀⠀\033[97m\u2575\u256F\033[38;2;158;72;68m\n"
-    //              "⠿⠋⣉⣉⡁⠈⠻⣿⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠀⠉⠀⠀⠀⠀\n"
-    //              "⠀⣾⣿⣿⣿⣷⣶⣿⡏⢡⣤⣤⠀⢀⣤⣄⡐⢦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
-    //              "⠀⠙⢿⣿⣿⡿⠛⣉⣁⣀⣿⠃⠐⠛⠿⣿⣷⠀⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
-    //              "⠀⠀⠀⠀⠈⠉⠃⠘⠿⠟⠛⠋⠀⠀⠀⠀⢹⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
-    //              "\033[37m";
 }
 
 // void REPL::repl_loop() {
@@ -325,11 +312,14 @@ bool REPL::is_aliased(std::string command) {
 
 void REPL::repl2() {
     ShellState state;
-    shell_startup();
+    load_aliases(state);
+    load_colors(state);
+    apply_default_colors(state);
+    shell_startup(state);
+
     char cwd[2048];
     Lexer lexer;
     Executor executor;
-    load_aliases(state);
     //load_rc_file(state, lexer, executor);
 
     while (true) {
@@ -340,7 +330,9 @@ void REPL::repl2() {
             continue;
         }
 
-        std::string prompt = "\033[34m(pangolin)\033[32m" + std::string(cwd) + "\033[34m$\033[0m ";
+        std::string prompt = "\033[34m(pangolin)"
+                            + get_color(state, "dir_color", RGB{0, 200, 0}).ansi()
+                            + std::string(cwd) + "\033[34m$\033[0m ";
         std::string user_input_commands;
         bool first_line = true;
 
@@ -355,6 +347,7 @@ void REPL::repl2() {
             if (!line) {
                 std::cout << "Exiting... Thanks for using the pangolin shell! Until next time, so long.\n";
                 save_aliases(state);
+                save_colors(state);
                 return; // ctrl+d
             }
 
@@ -382,12 +375,13 @@ void REPL::repl2() {
             Parser parser(tokens);
             auto ast = parser.parse();
             executor.execute(ast.get(), state);
-            
+
         } catch (const ExitException &e) {
             std::cout << "Exiting... Thanks for using the pangolin shell! Until next time, so long.\n";
-            save_aliases(state); 
-            break; 
-            
+            save_aliases(state);
+            save_colors(state);
+            break;
+
         } catch (const std::exception &e) {
             std::cerr << "\033[31m[!]\033[0m " << e.what() << ": " << user_input_commands << "\n";
         }
@@ -446,7 +440,7 @@ std::string REPL::expand_aliases(const std::string &input, ShellState &state) {
     std::string first_word = input.substr(start, end - start);
 
     auto it = state.aliases.find(first_word);
-    if (it != state.aliases.end()) { 
+    if (it != state.aliases.end()) {
         std::string alias_value = it->second;
         if (alias_value.substr(0, first_word.length()) == first_word && (alias_value.length() == first_word.length() || alias_value[first_word.length()] == ' ')) {
             std::string remainder = (end == std::string::npos) ? "" : input.substr(end);
@@ -456,9 +450,8 @@ std::string REPL::expand_aliases(const std::string &input, ShellState &state) {
         std::string remainder = (end == std::string::npos) ? "" : input.substr(end);
         return alias_value + remainder;
     }
-    return input; 
+    return input;
 }
-
 
 std::string REPL::get_rc_file() {
     const char *home = getenv("HOME");
@@ -469,26 +462,25 @@ std::string REPL::get_rc_file() {
     return std::string(home) + "/.pangolinrc";
 }
 
-void REPL::load_rc_file(ShellState& state, Lexer& lexer, Executor& executor) {
+void REPL::load_rc_file(ShellState &state, Lexer &lexer, Executor &executor) {
     std::ifstream fin(get_rc_file());
-    
 
     if (!fin.good()) {
-        return; 
+        return;
     }
 
     std::string line;
     while (getline(fin, line)) {
 
         if (line.empty() || line[0] == '#') {
-            continue; 
+            continue;
         }
 
         std::string expanded_input = expand_aliases(line, state);
 
         try {
             auto tokens = lexer.lex_input(expanded_input);
-            if (tokens.empty()) continue; 
+            if (tokens.empty()) continue;
 
             Parser parser(tokens);
             auto ast = parser.parse();
@@ -516,11 +508,11 @@ std::string REPL::get_aliases_dir() {
     return state_dir + "/pangolin/aliases.txt";
 }
 
-void REPL::load_aliases(ShellState& state) {
+void REPL::load_aliases(ShellState &state) {
     std::ifstream fin(get_aliases_dir());
-    
+
     if (!fin.is_open()) {
-        return; 
+        return;
     }
 
     std::string line;
@@ -534,15 +526,14 @@ void REPL::load_aliases(ShellState& state) {
     }
 }
 
-void REPL::save_aliases(ShellState& state) {
+void REPL::save_aliases(ShellState &state) {
     std::ofstream fout(get_aliases_dir());
     if (!fout.is_open()) {
         std::cerr << "\033[31m[!]\033[0m Could not open aliases file for saving.\n";
         return;
     }
-    
 
-    for (const auto& pair : state.aliases) {
+    for (const auto &pair : state.aliases) {
         fout << pair.first << "=" << pair.second << "\n";
     }
 }

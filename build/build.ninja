@@ -91,6 +91,12 @@ build CMakeFiles/pangolin.dir/src/calendar.cpp.o: CXX_COMPILER__pangolin_Debug /
   OBJECT_DIR = CMakeFiles/pangolin.dir
   OBJECT_FILE_DIR = CMakeFiles/pangolin.dir/src
 
+build CMakeFiles/pangolin.dir/src/theme.cpp.o: CXX_COMPILER__pangolin_Debug /home/criley/pangolin_shell/src/theme.cpp || cmake_object_order_depends_target_pangolin
+  DEP_FILE = CMakeFiles/pangolin.dir/src/theme.cpp.o.d
+  FLAGS = -g -Wall -Wextra -Wpedantic -std=gnu++23
+  OBJECT_DIR = CMakeFiles/pangolin.dir
+  OBJECT_FILE_DIR = CMakeFiles/pangolin.dir/src
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target pangolin
@@ -99,7 +105,7 @@ build CMakeFiles/pangolin.dir/src/calendar.cpp.o: CXX_COMPILER__pangolin_Debug /
 #############################################
 # Link the executable pangolin
 
-build pangolin: CXX_EXECUTABLE_LINKER__pangolin_Debug CMakeFiles/pangolin.dir/src/main.cpp.o CMakeFiles/pangolin.dir/src/repl.cpp.o CMakeFiles/pangolin.dir/src/commands.cpp.o CMakeFiles/pangolin.dir/src/lexer.cpp.o CMakeFiles/pangolin.dir/src/parser.cpp.o CMakeFiles/pangolin.dir/src/executor.cpp.o CMakeFiles/pangolin.dir/src/calendar.cpp.o
+build pangolin: CXX_EXECUTABLE_LINKER__pangolin_Debug CMakeFiles/pangolin.dir/src/main.cpp.o CMakeFiles/pangolin.dir/src/repl.cpp.o CMakeFiles/pangolin.dir/src/commands.cpp.o CMakeFiles/pangolin.dir/src/lexer.cpp.o CMakeFiles/pangolin.dir/src/parser.cpp.o CMakeFiles/pangolin.dir/src/executor.cpp.o CMakeFiles/pangolin.dir/src/calendar.cpp.o CMakeFiles/pangolin.dir/src/theme.cpp.o
   FLAGS = -g
   LINK_LIBRARIES = -lreadline  -lncurses
   OBJECT_DIR = CMakeFiles/pangolin.dir

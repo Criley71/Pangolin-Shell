@@ -13,6 +13,7 @@ add_executable(pangolin
     src/parser.cpp
     src/executor.cpp
     src/calendar.cpp
-    include/shell_state.h)
+    include/shell_state.h
+    src/theme.cpp)
 target_link_libraries(pangolin PRIVATE readline ncurses)
 target_compile_options(pangolin PRIVATE -Wall -Wextra -Wpedantic)
